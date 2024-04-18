@@ -8,6 +8,7 @@ import javax.validation.constraints.*;
 @Setter
 @AllArgsConstructor
 @ToString
+@Builder
 public class UserDto {
     @Positive(groups = Update.class)
     private Long id;

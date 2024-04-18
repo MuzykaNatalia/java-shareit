@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.model.User;
 @Setter
 @AllArgsConstructor
 @ToString
+@Builder
 public class Item {
     private Long id;
     private String name;

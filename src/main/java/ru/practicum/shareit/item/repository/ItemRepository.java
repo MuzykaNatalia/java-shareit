@@ -4,7 +4,7 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.Collection;
 
 public interface ItemRepository {
-    Item getItemById(Long userId, Long itemId);
+    Item getItemById(Long itemId, Long userId);
 
     Collection<Item> getAllItemUser(Long userId);
 

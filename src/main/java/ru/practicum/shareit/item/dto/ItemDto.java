@@ -12,6 +12,7 @@ import javax.validation.constraints.*;
 @Setter
 @AllArgsConstructor
 @ToString
+@Builder
 public class ItemDto {
     @Positive(groups = Update.class)
     private Long id;

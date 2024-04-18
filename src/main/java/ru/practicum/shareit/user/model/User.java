@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @ToString
+@Builder
 public class User {
     private Long id;
     private String name;

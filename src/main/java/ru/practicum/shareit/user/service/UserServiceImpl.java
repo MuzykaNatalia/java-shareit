@@ -17,60 +17,65 @@ import java.util.Collection;
 @Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
     @Autowired
-    private UserMapper mapper;
+    private UserMapper userMapper;
 
     @Override
     public UserDto getUserById(Long userId) {
-        User user = repository.getUserById(userId);
+        User user = userRepository.getUserById(userId);
         if (user == null) {
-            log.warn("User with id=" + userId + " not found");
+            log.warn("User with id={} not found", userId);
             throw new NotFoundException("User with id=" + userId + " not found");
         }
-        return mapper.toUserDto(user);
+        log.info("The user was received by id={}", userId);
+        return userMapper.toUserDto(user);
     }
 
     @Override
     public Collection<UserDto> getAllUserDto() {
-        return mapper.listToUserDto(repository.getAllUser());
+        log.info("All users have been received");
+        return userMapper.listToUserDto(userRepository.getAllUser());
     }
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User createdUser = repository.createUser(mapper.toUser(userDto));
+        User createdUser = userRepository.createUser(userMapper.toUser(userDto));
         if (createdUser == null) {
-            log.warn("The user with this email=" + userDto.getEmail() + " already exists");
+            log.warn("The user with this email={} already exists", userDto.getEmail());
             throw new ConflictException("The user with this email=" + userDto.getEmail() + " already exists");
         }
-        return mapper.toUserDto(createdUser);
+        log.info("User has been created={}", createdUser);
+        return userMapper.toUserDto(createdUser);
     }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDtoNew) {
-        if (!repository.isExistId(userId)) {
-            log.warn("The user with this id=" + userDtoNew.getId() + " not already exists");
+        if (!userRepository.isExistId(userId)) {
+            log.warn("The user with this id={} not already exists", userDtoNew.getId());
             throw new ValidationException("The user with this id=" + userDtoNew.getId() + " not already exists");
         }
         UserDto userDtoOld = getUserById(userId);
         isExistEmail(userDtoNew.getEmail(), userDtoOld.getEmail());
         setUser(userDtoOld, userDtoNew);
-        User user = repository.updateUser(mapper.toUser(userDtoOld));
-        return mapper.toUserDto(user);
+        User updatedUser = userRepository.updateUser(userMapper.toUser(userDtoOld));
+        log.info("User has been updated={}", updatedUser);
+        return userMapper.toUserDto(updatedUser);
     }
 
     @Override
     public void deleteUserById(Long userId) {
-        repository.deleteUserById(userId);
+        log.info("User with id={} deleted", userId);
+        userRepository.deleteUserById(userId);
     }
 
     private void isExistEmail(String emailNew, String email) {
         if (emailNew == null) {
             return;
         }
-        boolean isExistEmail = repository.isExistEmail(emailNew);
+        boolean isExistEmail = userRepository.isExistEmail(emailNew);
         if (isExistEmail && !emailNew.equals(email)) {
-            log.warn("The user with this email=" + emailNew + " already exists");
+            log.warn("The user with this email={} already exists", emailNew);
             throw new ConflictException("The user with this email=" + emailNew + " already exists");
         }
     }

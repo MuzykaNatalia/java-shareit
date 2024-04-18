@@ -19,34 +19,34 @@ import java.util.Collection;
 @Validated
 public class ItemController {
     @Autowired
-    ItemService service;
+    ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                               @PathVariable @Positive @NotNull Long itemId) {
-        return service.getItemById(userId, itemId);
+    public ItemDto getItemById(@PathVariable @Positive @NotNull Long itemId,
+                               @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
     public Collection<ItemDto> getAllItemUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.getAllItemUser(userId);
+        return itemService.getAllItemUser(userId);
     }
 
     @PostMapping
     public ItemDto createItem(@Validated(Create.class) @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.createItem(userId, itemDto);
+        return itemService.createItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@Validated(Update.class) @RequestBody ItemDto itemDto,
                               @PathVariable @Positive @NotNull Long itemId,
                               @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.updateItem(userId, itemId, itemDto);
+        return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text) {
-        return service.searchItems(text);
+        return itemService.searchItems(text);
     }
 }

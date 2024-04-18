@@ -19,31 +19,31 @@ import java.util.Collection;
 @Validated
 public class UserController {
     @Autowired
-    private UserService service;
+    private UserService userService;
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable @Positive @NotNull Long userId) {
-        return service.getUserById(userId);
+        return userService.getUserById(userId);
     }
 
     @GetMapping
     public Collection<UserDto> getAllUserDto() {
-        return service.getAllUserDto();
+        return userService.getAllUserDto();
     }
 
     @PostMapping
     public UserDto createUser(@Validated(Create.class) @RequestBody UserDto userDto) {
-        return service.createUser(userDto);
+        return userService.createUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable @Positive @NotNull Long userId,
                               @Validated(Update.class) @RequestBody UserDto userDto) {
-        return service.updateUser(userId, userDto);
+        return userService.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUserById(@PathVariable @Positive @NotNull Long userId) {
-        service.deleteUserById(userId);
+        userService.deleteUserById(userId);
     }
 }

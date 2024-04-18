@@ -11,7 +11,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     private Long id = 1L;
 
     @Override
-    public Item getItemById(Long userId, Long itemId) {
+    public Item getItemById(Long itemId, Long userId) {
         return items.values().stream()
                 .flatMap(Collection::stream)
                 .filter(item -> item.getId().equals(itemId))
