@@ -13,6 +13,7 @@ import ru.practicum.shareit.user.dto.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +28,10 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private final UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     @Override
     public ItemDto getItemById(Long itemId, Long userId) {
-        Item item = itemRepository.getItemById(itemId, userId);
+        Item item = itemRepository.findById(itemId).stream().findFirst().orElse(null);
         if (item == null) {
             log.warn("The item with this id={} not found", itemId);
             throw new NotFoundException("The item with this id=" + itemId + " not found");
@@ -38,35 +40,39 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.toItemDto(item);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Collection<ItemDto> getAllItemUser(Long userId) {
-        Collection<Item> items = itemRepository.getAllItemUser(userId);
+        Collection<Item> items = itemRepository.findAllByOwnerId(userId);
         log.info("All items have been received");
         return itemMapper.listToItemDto(items);
     }
 
+    @Transactional
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        User user = isExistUser(userId);
-        Item item = itemRepository.createItem(itemMapper.toItem(itemDto, user));
+        User user = userMapper.toUser(userService.getUserById(userId));
+        Item item = itemRepository.save(itemMapper.toItem(itemDto, user));
         log.info("Item has been created={}", item);
         return itemMapper.toItemDto(item);
     }
 
+    @Transactional
     @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDtoNew) {
-        User user = isExistUser(userId);
-        ItemDto itemDtoOld = getItemById(itemId, userId);
-        if (!itemDtoOld.getOwnerId().equals(userId)) {
+        User user = userMapper.toUser(userService.getUserById(userId));
+        Item itemOld = itemRepository.findById(itemId).stream().findFirst().orElse(null);
+        if (itemOld == null || !itemOld.getOwner().getId().equals(userId)) {
             log.warn("The item with this id={} not found", itemId);
             throw new NotFoundException("The item with this id=" + itemId + " not found");
         }
-        setItemDto(itemDtoOld, itemDtoNew);
-        Item item = itemRepository.updateItem(itemMapper.toItem(itemDtoOld, user));
+        setItemDto(itemOld, itemDtoNew, user);
+        Item item = itemRepository.save(itemOld);
         log.info("Item has been updated={}", item);
         return itemMapper.toItemDto(item);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Collection<ItemDto> searchItems(String text) {
         if (text.isEmpty()) {
@@ -77,24 +83,16 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.listToItemDto(items);
     }
 
-    private User isExistUser(Long userId) {
-        User user = userMapper.toUser(userService.getUserById(userId));
-        if (user == null) {
-            log.warn("The user with this id={} not found", userId);
-            throw new NotFoundException("The user with this id=" + userId + " not found");
-        }
-        return user;
-    }
-
-    private void setItemDto(ItemDto itemDtoOld, ItemDto itemDtoNew) {
+    private void setItemDto(Item itemOld, ItemDto itemDtoNew, User user) {
         if (itemDtoNew.getName() != null && !itemDtoNew.getName().isEmpty()) {
-            itemDtoOld.setName(itemDtoNew.getName());
+            itemOld.setName(itemDtoNew.getName());
         }
         if (itemDtoNew.getDescription() != null && !itemDtoNew.getDescription().isEmpty()) {
-            itemDtoOld.setDescription(itemDtoNew.getDescription());
+            itemOld.setDescription(itemDtoNew.getDescription());
         }
         if (itemDtoNew.getAvailable() != null) {
-            itemDtoOld.setAvailable(itemDtoNew.getAvailable());
+            itemOld.setAvailable(itemDtoNew.getAvailable());
         }
+        itemOld.setOwner(user);
     }
 }
