@@ -105,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
 
     private Collection<Booking> getBookingsForOwner(BookingState state, Long userId) {
         LocalDateTime current = LocalDateTime.now();
-        switch(state) {
+        switch (state) {
             case CURRENT: return bookingRepository.findAllByStartAndEndAndOwner(current, userId);
             case PAST: return bookingRepository.findAllByEndBeforeAndOwner(current, userId);
             case FUTURE: return bookingRepository.findAllByStartAfterAndOwner(current, userId);
@@ -117,7 +117,7 @@ public class BookingServiceImpl implements BookingService {
 
     private Collection<Booking> getBookingsForBooker(BookingState state, Long userId) {
         LocalDateTime current = LocalDateTime.now();
-        switch(state) {
+        switch (state) {
             case CURRENT: return bookingRepository.findAllByStartAndEndAndBooker(current, userId);
             case PAST: return bookingRepository.findAllByEndBeforeAndBooker(current, userId);
             case FUTURE: return bookingRepository.findAllByStartAfterAndBooker(current, userId);
