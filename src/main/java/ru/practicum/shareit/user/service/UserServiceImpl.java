@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.user.dto.*;
@@ -12,28 +11,32 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import javax.validation.ValidationException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     @Override
     public UserDto getUserById(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
+        User user = getById(userId);
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public User getById(Long userId) {
+        User user = userRepository.findById(userId).stream().findFirst().orElse(null);
+        if (user == null) {
             log.warn("User with id={} not found", userId);
             throw new NotFoundException("User with id=" + userId + " not found");
         }
         log.info("The user was received by id={}", userId);
-        return userMapper.toUserDto(user.get());
+        return user;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +44,7 @@ public class UserServiceImpl implements UserService {
     public Collection<UserDto> getAllUserDto() {
         log.info("All users have been received");
         List<User> allUsers = userRepository.findAll();
-        return userMapper.listToUserDto(allUsers);
+        return userMapper.toUserDto(allUsers);
     }
 
     @Transactional

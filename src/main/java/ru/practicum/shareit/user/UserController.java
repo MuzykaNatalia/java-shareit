@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.config.*;
@@ -18,8 +17,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable @Positive @NotNull Long userId) {
