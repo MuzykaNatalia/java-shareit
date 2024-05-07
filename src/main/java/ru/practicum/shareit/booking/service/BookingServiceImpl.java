@@ -31,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto createBooking(Long userId, BookingDtoCreate bookingDtoCreate) {
-        User booker = userService.getById(userId);
+        User booker = userService.getUserById(userId);
         Item item = itemService.getItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
         isBooker(userId, item);
         Booking booking = bookingRepository.save(bookingMapper.toBooking(bookingDtoCreate, booker, item));
@@ -42,11 +42,12 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto updateBooking(Long userId, Long bookingId, Boolean approved) {
-        Booking bookingOld = isBooking(userId, bookingId);
+        Booking bookingOld = isBookingExistAndNotWaiting(userId, bookingId);
         BookingStatus status = approved ? APPROVED : REJECTED;
         bookingOld.setStatus(status);
         isOwner(userId, bookingOld);
         Booking bookingUpdated = bookingRepository.save(bookingOld);
+        log.info("Owner item updated status booking id={} to : {}", userId, status);
         return bookingMapper.toBookingDto(bookingUpdated);
     }
 
@@ -57,26 +58,29 @@ public class BookingServiceImpl implements BookingService {
             log.warn("The booking with this id={} not found", bookingId);
             throw new NotFoundException("The booking with this id=" + bookingId + " not found");
         });
+        log.info("Information about the booking id={} was obtained by the user id={}", bookingId, userId);
         return bookingMapper.toBookingDto(booking);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Collection<BookingDto> getAllBookingsBooker(Long userId, BookingState bookingState) {
-        userService.getById(userId);
+        userService.getUserById(userId);
         Collection<Booking> allBookings = getBookingsForBooker(bookingState, userId);
-        return bookingMapper.toBookingDto(allBookings);
+        log.info("Information about the bookings was obtained by the booker id={}", userId);
+        return bookingMapper.toBookingDtoCollection(allBookings);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Collection<BookingDto> getAllBookingsOwner(Long userId, BookingState bookingState) {
-        userService.getById(userId);
+        userService.getUserById(userId);
         Collection<Booking> allBookings = getBookingsForOwner(bookingState, userId);
-        return bookingMapper.toBookingDto(allBookings);
+        log.info("Information about the bookings was obtained by the owner id={}", userId);
+        return bookingMapper.toBookingDtoCollection(allBookings);
     }
 
-    private Booking isBooking(Long userId, Long bookingId) {
+    private Booking isBookingExistAndNotWaiting(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
             log.warn("Booking id={} user id={} not found", bookingId, userId);
             return new NotFoundException("Booking with id=" + bookingId + " not found");
@@ -106,24 +110,26 @@ public class BookingServiceImpl implements BookingService {
     private Collection<Booking> getBookingsForOwner(BookingState state, Long userId) {
         LocalDateTime current = LocalDateTime.now();
         switch (state) {
-            case CURRENT: return bookingRepository.findAllByStartAndEndAndOwner(current, userId);
-            case PAST: return bookingRepository.findAllByEndBeforeAndOwner(current, userId);
-            case FUTURE: return bookingRepository.findAllByStartAfterAndOwner(current, userId);
-            case WAITING: return bookingRepository.findAllBookingByStatusAndByOwner(WAITING, userId);
-            case REJECTED: return bookingRepository.findAllBookingByStatusAndByOwner(REJECTED, userId);
+            case PAST: return bookingRepository.findAllByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, current);
+            case FUTURE: return bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, current);
+            case WAITING: return bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, WAITING);
+            case REJECTED: return bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, REJECTED);
+            case CURRENT: return bookingRepository
+                    .findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, current, current);
         }
-        return bookingRepository.findAllBookingByOwner(userId);
+        return bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
     }
 
     private Collection<Booking> getBookingsForBooker(BookingState state, Long userId) {
         LocalDateTime current = LocalDateTime.now();
         switch (state) {
-            case CURRENT: return bookingRepository.findAllByStartAndEndAndBooker(current, userId);
-            case PAST: return bookingRepository.findAllByEndBeforeAndBooker(current, userId);
-            case FUTURE: return bookingRepository.findAllByStartAfterAndBooker(current, userId);
-            case WAITING: return bookingRepository.findAllBookingByStatusAndByBooker(WAITING, userId);
-            case REJECTED: return bookingRepository.findAllBookingByStatusAndByBooker(REJECTED, userId);
+            case PAST: return bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, current);
+            case FUTURE: return bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, current);
+            case WAITING: return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, WAITING);
+            case REJECTED: return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, REJECTED);
+            case CURRENT: return bookingRepository
+                    .findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, current, current);
         }
-        return bookingRepository.findAllBookingByBooker(userId);
+        return bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
     }
 }

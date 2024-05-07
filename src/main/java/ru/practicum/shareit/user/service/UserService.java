@@ -5,9 +5,9 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Collection;
 
 public interface UserService {
-    UserDto getUserById(Long userId);
+    UserDto getUserDtoById(Long userId);
 
-    User getById(Long userId);
+    User getUserById(Long userId);
 
     Collection<UserDto> getAllUserDto();
 

@@ -31,17 +31,18 @@ public class ItemMapper {
                 .build();
     }
 
-    public ItemDtoInfo toItemDtoInfo(Item item, Map<Long, List<CommentDto>> comments) {
+    public ItemDtoInfo toOneItemDtoInfoForAllUsers(Item item, List<CommentDto> commentDto) {
         return ItemDtoInfo.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .comments(comments.isEmpty() ? new ArrayList<>() : comments.get(item.getId()))
+                .comments(commentDto)
                 .build();
     }
 
-    public ItemDtoInfo toItemDtoInfo(Item item, BookingDtoInfo next, BookingDtoInfo last, List<CommentDto> comments) {
+    public ItemDtoInfo toOneItemDtoInfoForOwner(Item item, BookingDtoInfo next, BookingDtoInfo last,
+                                             List<CommentDto> comments) {
         return ItemDtoInfo.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -49,11 +50,11 @@ public class ItemMapper {
                 .available(item.getAvailable())
                 .nextBooking(next)
                 .lastBooking(last)
-                .comments(comments != null ? comments : new ArrayList<>())
+                .comments(comments)
                 .build();
     }
 
-    public Collection<ItemDto> toItemDto(Collection<Item> items) {
+    public Collection<ItemDto> toItemDtoCollection(Collection<Item> items) {
         return items.stream()
                 .map(this::toItemDto)
                 .collect(Collectors.toList());

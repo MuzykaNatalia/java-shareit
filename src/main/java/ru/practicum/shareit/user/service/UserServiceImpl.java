@@ -21,15 +21,14 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
-    @Override
-    public UserDto getUserById(Long userId) {
-        User user = getById(userId);
+    public UserDto getUserDtoById(Long userId) {
+        User user = getUserById(userId);
         return userMapper.toUserDto(user);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public User getById(Long userId) {
+    public User getUserById(Long userId) {
         User user = userRepository.findById(userId).stream().findFirst().orElse(null);
         if (user == null) {
             log.warn("User with id={} not found", userId);
@@ -44,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public Collection<UserDto> getAllUserDto() {
         log.info("All users have been received");
         List<User> allUsers = userRepository.findAll();
-        return userMapper.toUserDto(allUsers);
+        return userMapper.toUserDtoCollection(allUsers);
     }
 
     @Transactional
