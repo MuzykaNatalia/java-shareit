@@ -1,12 +1,14 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.config.*;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoInfo;
 import ru.practicum.shareit.item.service.ItemService;
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.Collection;
 
@@ -18,17 +20,16 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @Validated
 public class ItemController {
-    @Autowired
-    ItemService itemService;
+    private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable @Positive @NotNull Long itemId,
-                               @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getItemById(itemId, userId);
+    public ItemDtoInfo getItemById(@PathVariable @Positive @NotNull Long itemId,
+                                   @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getItemDtoById(itemId, userId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItemUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDtoInfo> getAllItemUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getAllItemUser(userId);
     }
 
@@ -48,5 +49,12 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text) {
         return itemService.searchItems(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    @RequestHeader("X-Sharer-User-Id") Long userId,
+                                    @PathVariable @Positive @NotNull Long itemId) {
+        return itemService.createComment(commentDto, userId, itemId);
     }
 }
