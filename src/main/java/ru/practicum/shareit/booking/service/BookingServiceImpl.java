@@ -11,7 +11,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.dto.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import javax.validation.ValidationException;
@@ -24,15 +25,17 @@ import static ru.practicum.shareit.booking.BookingStatus.*;
 @Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
     private final UserService userService;
-    private final ItemService itemService;
     private final BookingMapper bookingMapper;
+    private final UserMapper userMapper;
 
     @Transactional
     @Override
     public BookingDto createBooking(Long userId, BookingDtoCreate bookingDtoCreate) {
-        User booker = userService.getUserById(userId);
-        Item item = itemService.getItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
+        User booker = userMapper.toUser(userService.getUserDtoById(userId));
+        Item item = isItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
+
         isBooker(userId, item);
         Booking booking = bookingRepository.save(bookingMapper.toBooking(bookingDtoCreate, booker, item));
         log.info("User id={} created booking id={} : {}", userId, booking.getId(), bookingDtoCreate);
@@ -46,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
         BookingStatus status = approved ? APPROVED : REJECTED;
         bookingOld.setStatus(status);
         isOwner(userId, bookingOld);
+
         Booking bookingUpdated = bookingRepository.save(bookingOld);
         log.info("Owner item updated status booking id={} to : {}", userId, status);
         return bookingMapper.toBookingDto(bookingUpdated);
@@ -65,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     @Override
     public Collection<BookingDto> getAllBookingsBooker(Long userId, BookingState bookingState) {
-        userService.getUserById(userId);
+        userService.getUserDtoById(userId);
         Collection<Booking> allBookings = getBookingsForBooker(bookingState, userId);
         log.info("Information about the bookings was obtained by the booker id={}", userId);
         return bookingMapper.toBookingDtoCollection(allBookings);
@@ -74,10 +78,23 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     @Override
     public Collection<BookingDto> getAllBookingsOwner(Long userId, BookingState bookingState) {
-        userService.getUserById(userId);
+        userService.getUserDtoById(userId);
         Collection<Booking> allBookings = getBookingsForOwner(bookingState, userId);
         log.info("Information about the bookings was obtained by the owner id={}", userId);
         return bookingMapper.toBookingDtoCollection(allBookings);
+    }
+
+    private Item isItemByIdAvailable(Long itemId, Long userId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
+            log.warn("The item with this id={} not found for user id={}", itemId, userId);
+            throw new NotFoundException("The item with this id=" + itemId + " not found");
+        });
+
+        if (item.getAvailable().equals(false)) {
+            log.warn("The item with id={} not found or not available", itemId);
+            throw new ValidationException("The item with this id=" + itemId + " not found or not available");
+        }
+        return item;
     }
 
     private Booking isBookingExistAndNotWaiting(Long userId, Long bookingId) {

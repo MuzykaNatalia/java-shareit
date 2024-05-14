@@ -44,6 +44,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId, userId);
         List<Comment> comments = commentRepository.findByItem_Id(itemId).orElse(new ArrayList<>());
         Map<Long, List<CommentDto>> commentsItem = getCommentDtoSortByIdItem(comments);
+
         boolean isOwner = itemRepository.existsByIdAndOwner_Id(itemId, userId);
         if (!isOwner) {
             List<CommentDto> commentDto = commentsItem.isEmpty() ? new ArrayList<>() : commentsItem.get(item.getId());
@@ -51,18 +52,6 @@ public class ItemServiceImpl implements ItemService {
         }
         log.info("Information about the item id={} was obtained by the user id={}", itemId, userId);
         return setBookingsForOwner(List.of(item), List.of(itemId), commentsItem).stream().findFirst().orElse(null);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public Item getItemByIdAvailable(Long itemId, Long userId) {
-        Item item = getItemById(itemId, userId);
-        if (item.getAvailable().equals(false)) {
-            log.warn("The item with id={} not found or not available", itemId);
-            throw new ValidationException("The item with this id=" + itemId + " not found or not available");
-        }
-        log.info("Information about the item id={} was obtained by the user id={}", itemId, userId);
-        return item;
     }
 
     @Transactional(readOnly = true)
@@ -113,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long userId, Long itemId) {
-        User user = userService.getUserById(userId);
+        User user = userMapper.toUser(userService.getUserDtoById(userId));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> {
             log.warn("A user={} wants to leave a review for an item id={} that doesn't exist", userId, itemId);
             throw new ValidationException("The item doesn't exist yet");

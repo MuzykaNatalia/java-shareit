@@ -22,20 +22,13 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     public UserDto getUserDtoById(Long userId) {
-        User user = getUserById(userId);
-        return userMapper.toUserDto(user);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public User getUserById(Long userId) {
-        User user = userRepository.findById(userId).stream().findFirst().orElse(null);
-        if (user == null) {
+        User user = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
             log.warn("User with id={} not found", userId);
             throw new NotFoundException("User with id=" + userId + " not found");
-        }
+        });
+
         log.info("The user was received by id={}", userId);
-        return user;
+        return userMapper.toUserDto(user);
     }
 
     @Transactional(readOnly = true)
@@ -61,11 +54,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto updateUser(Long userId, UserDto userDtoNew) {
-        User userOld = userRepository.findById(userId).stream().findFirst().orElse(null);
-        if (userOld == null) {
+        User userOld = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
             log.warn("The user with this id={} not already exists", userId);
             throw new ValidationException("The user with this id=" + userId + " not already exists");
-        }
+        });
 
         isExistEmail(userDtoNew.getEmail(), userOld.getEmail());
         User updatedUser = userRepository.save(setUser(userOld, userDtoNew));
