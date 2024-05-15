@@ -25,8 +25,9 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<UserDto> getAllUserDto() {
-        return userService.getAllUserDto();
+    public Collection<UserDto> getAllUserDto(@RequestParam(defaultValue = "0", required = false) @Min(0) Integer from,
+                                             @RequestParam(defaultValue = "10", required = false) @Min(1) Integer size) {
+        return userService.getAllUserDto(from, size);
     }
 
     @PostMapping

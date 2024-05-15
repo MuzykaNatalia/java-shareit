@@ -10,9 +10,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
@@ -42,14 +39,22 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> getAllBookingsBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                        @RequestParam(defaultValue = "ALL")
-                                                       @ValidState String state) {
-        return bookingService.getAllBookingsBooker(userId, BookingState.valueOf(state));
+                                                       @ValidState String state,
+                                                       @RequestParam(defaultValue = "0", required = false)
+                                                       @Min(0) Integer from,
+                                                       @RequestParam(defaultValue = "10", required = false)
+                                                       @Min(1) Integer size) {
+        return bookingService.getAllBookingsBooker(userId, BookingState.valueOf(state), from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingDto> getAllBookingsOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                       @RequestParam(defaultValue = "ALL")
-                                                      @ValidState String state) {
-        return bookingService.getAllBookingsOwner(userId, BookingState.valueOf(state));
+                                                      @ValidState String state,
+                                                      @RequestParam(defaultValue = "0", required = false)
+                                                      @Min(0) Integer from,
+                                                      @RequestParam(defaultValue = "10", required = false)
+                                                      @Min(1) Integer size) {
+        return bookingService.getAllBookingsOwner(userId, BookingState.valueOf(state), from, size);
     }
 }

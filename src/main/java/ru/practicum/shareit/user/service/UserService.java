@@ -6,7 +6,7 @@ import java.util.Collection;
 public interface UserService {
     UserDto getUserDtoById(Long userId);
 
-    Collection<UserDto> getAllUserDto();
+    Collection<UserDto> getAllUserDto(Integer from, Integer size);
 
     UserDto createUser(UserDto userDto);
 

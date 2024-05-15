@@ -12,9 +12,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -29,8 +26,12 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDtoInfo> getAllItemUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getAllItemUser(userId);
+    public Collection<ItemDtoInfo> getAllItemUser(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                  @RequestParam(defaultValue = "0", required = false)
+                                                  @Min(0) Integer from,
+                                                  @RequestParam(defaultValue = "10", required = false)
+                                                  @Min(1) Integer size) {
+        return itemService.getAllItemUser(userId, from, size);
     }
 
     @PostMapping
@@ -47,8 +48,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItems(@RequestParam String text) {
-        return itemService.searchItems(text);
+    public Collection<ItemDto> searchItems(@RequestParam String text,
+                                           @RequestParam(defaultValue = "0", required = false)
+                                           @Min(0) Integer from,
+                                           @RequestParam(defaultValue = "10", required = false)
+                                           @Min(1) Integer size) {
+        return itemService.searchItems(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
