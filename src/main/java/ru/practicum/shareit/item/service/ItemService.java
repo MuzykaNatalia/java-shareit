@@ -9,9 +9,9 @@ public interface ItemService {
 
     Collection<ItemDtoInfo> getAllItemUser(Long userId, Integer from, Integer size);
 
-    ItemDto createItem(Long userId, ItemDto itemDto);
+    ItemDto createItem(ItemDto itemDto, Long userId);
 
-    ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto);
+    ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId);
 
     Collection<ItemDto> searchItems(String text, Integer from, Integer size);
 

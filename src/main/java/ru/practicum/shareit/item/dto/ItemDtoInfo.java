@@ -10,7 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class ItemDtoInfo {
+    @EqualsAndHashCode.Exclude
     private Long id;
     private String name;
     private String description;

@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
-    public UserDto getUserDtoById(Long userId) {
+    public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
             log.warn("User with id={} not found", userId);
             throw new NotFoundException("User with id=" + userId + " not found");
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<UserDto> getAllUserDto(Integer from, Integer size) {
+    public Collection<UserDto> getAllUser(Integer from, Integer size) {
         log.info("All users have been received");
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.asc("id")));
         List<User> allUsers = userRepository.findAll(pageable).getContent();
@@ -51,7 +51,8 @@ public class UserServiceImpl implements UserService {
             log.info("User has been created={}", createdUser);
             return userMapper.toUserDto(createdUser);
         } catch (Exception e) {
-            throw new ConflictException(e.getMessage());
+            log.warn("A user with such an email={} already exists", userDto.getEmail());
+            throw new ConflictException("A user with such an email=" + userDto.getEmail() + " already exists");
         }
     }
 

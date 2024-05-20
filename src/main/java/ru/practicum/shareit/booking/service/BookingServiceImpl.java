@@ -35,8 +35,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto createBooking(Long userId, BookingDtoCreate bookingDtoCreate) {
-        User booker = userMapper.toUser(userService.getUserDtoById(userId));
+    public BookingDto createBooking(BookingDtoCreate bookingDtoCreate, Long userId) {
+        User booker = userMapper.toUser(userService.getUserById(userId));
         Item item = isItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
 
         isBooker(userId, item);
@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDto> getAllBookingsBooker(Long userId, BookingState bookingState,
                                                        Integer from, Integer size) {
-        userService.getUserDtoById(userId);
+        userService.getUserById(userId);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
         Collection<Booking> allBookings = getBookingsForBooker(bookingState, userId, pageable);
         log.info("Information about the bookings was obtained by the booker id={}", userId);
@@ -84,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDto> getAllBookingsOwner(Long userId, BookingState bookingState,
                                                       Integer from, Integer size) {
-        userService.getUserDtoById(userId);
+        userService.getUserById(userId);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
         Collection<Booking> allBookings = getBookingsForOwner(bookingState, userId, pageable);
         log.info("Information about the bookings was obtained by the owner id={}", userId);

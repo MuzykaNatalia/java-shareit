@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class BookingDto {
+    @EqualsAndHashCode.Exclude
     private Long id;
     private LocalDateTime start;
     private LocalDateTime end;

@@ -8,9 +8,12 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class ItemDto {
+    @EqualsAndHashCode.Exclude
     @Positive(groups = Update.class)
     private Long id;
     @NotBlank(groups = Create.class)

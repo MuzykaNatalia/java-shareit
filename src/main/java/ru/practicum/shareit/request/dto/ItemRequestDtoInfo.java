@@ -10,7 +10,9 @@ import java.util.Collection;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class ItemRequestDtoInfo {
+    @EqualsAndHashCode.Exclude
     private Long id;
     private String description;
     private LocalDateTime created;

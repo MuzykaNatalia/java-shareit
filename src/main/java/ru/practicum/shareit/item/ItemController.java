@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.config.*;
@@ -35,16 +36,17 @@ public class ItemController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@Validated(Create.class) @RequestBody ItemDto itemDto,
                               @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.createItem(userId, itemDto);
+        return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@Validated(Update.class) @RequestBody ItemDto itemDto,
                               @PathVariable @Positive @NotNull Long itemId,
                               @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.updateItem(userId, itemId, itemDto);
+        return itemService.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/search")

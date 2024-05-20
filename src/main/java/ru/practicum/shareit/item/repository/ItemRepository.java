@@ -10,6 +10,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     boolean existsByIdAndOwner_Id(Long id, Long ownerId);
 
-    List<Item> findByAvailableTrueAndDescriptionContainsOrNameContainsAllIgnoreCase(String text, String textDuplicate,
-                                                                                    Pageable pageable);
+    List<Item> findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(String text,
+                                                                                                 String textDuplicate,
+                                                                                                 Pageable pageable);
 }
