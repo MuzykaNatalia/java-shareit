@@ -200,7 +200,7 @@ public class ItemControllerTest {
     @SneakyThrows
     public void shouldCreateComment() {
         CommentDto commentDtoCreate = new CommentDto(null, "good", null, null, null);
-        CommentDto commentDto = new CommentDto(1L, "good", "Ivan", TIME_NOW, 1L);
+        CommentDto commentDto = new CommentDto(1L, "good", "Ivan", FIXED_TIME, 1L);
 
         when(itemService.createComment(any(), anyLong(), anyLong())).thenReturn(commentDto);
 
@@ -222,11 +222,13 @@ public class ItemControllerTest {
 
     private ItemDtoInfo getItemDtoInfo() {
         return new ItemDtoInfo(1L, "saw", "wood saw", true,
-                new BookingDtoInfo(1L, 1L, TIME_NOW.minusDays(2), TIME_NOW.minusDays(1), APPROVED, 1L),
-                new BookingDtoInfo(2L, 1L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2), APPROVED, 1L),
+                new BookingDtoInfo(1L, 1L,
+                        FIXED_TIME.minusDays(2), FIXED_TIME.minusDays(1), APPROVED, 1L),
+                new BookingDtoInfo(2L, 1L,
+                        FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2), APPROVED, 1L),
                 List.of(
-                        new CommentDto(2L, "cool", "Maria", TIME_NOW, 1L),
-                        new CommentDto(3L, "ok", "Sveta", TIME_NOW, 1L)
+                        new CommentDto(2L, "cool", "Maria", FIXED_TIME, 1L),
+                        new CommentDto(3L, "ok", "Sveta", FIXED_TIME, 1L)
                 )
         );
     }
@@ -234,19 +236,19 @@ public class ItemControllerTest {
     private List<ItemDtoInfo> getItemDtoInfoList() {
         return List.of(
                 new ItemDtoInfo(1L, "hoe", "garden hoe", true,
-                        new BookingDtoInfo(1L, 1L, TIME_NOW.minusDays(2), TIME_NOW.minusDays(1),
+                        new BookingDtoInfo(1L, 1L, FIXED_TIME.minusDays(2), FIXED_TIME.minusDays(1),
                                 APPROVED, 1L),
-                        new BookingDtoInfo(2L, 1L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2),
+                        new BookingDtoInfo(2L, 1L, FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2),
                                 APPROVED, 1L),
                         List.of(
-                                new CommentDto(2L, "cool", "Maria", TIME_NOW, 1L),
-                                new CommentDto(3L, "ok", "Sveta", TIME_NOW, 1L)
+                                new CommentDto(2L, "cool", "Maria", FIXED_TIME, 1L),
+                                new CommentDto(3L, "ok", "Sveta", FIXED_TIME, 1L)
                         )),
                 new ItemDtoInfo(2L, "rake", "leaf rake", true,
-                        new BookingDtoInfo(3L, 1L, TIME_NOW.minusDays(3), TIME_NOW.minusDays(1),
+                        new BookingDtoInfo(3L, 1L, FIXED_TIME.minusDays(3), FIXED_TIME.minusDays(1),
                                 APPROVED, 2L
                         ),
-                        new BookingDtoInfo(4L, 1L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2),
+                        new BookingDtoInfo(4L, 1L, FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2),
                                 APPROVED, 2L
                         ),
                         new ArrayList<>())

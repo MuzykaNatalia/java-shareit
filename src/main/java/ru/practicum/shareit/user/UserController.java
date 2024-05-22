@@ -23,8 +23,8 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<UserDto> getAllUser(@RequestParam(defaultValue = "0", required = false) @Min(0) Integer from,
-                                             @RequestParam(defaultValue = "10", required = false) @Min(1) Integer size) {
+    public Collection<UserDto> getAllUser(@RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                          @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         return userService.getAllUser(from, size);
     }
 

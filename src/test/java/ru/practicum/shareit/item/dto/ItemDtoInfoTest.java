@@ -1,18 +1,19 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
 import ru.practicum.shareit.booking.dto.BookingDtoInfo;
 import ru.practicum.shareit.item.comment.CommentDto;
-import java.time.LocalDateTime;
+import java.nio.file.Files;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.practicum.shareit.Constant.DATE_FORMAT;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 
 @JsonTest
@@ -20,7 +21,6 @@ import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 public class ItemDtoInfoTest {
     @Autowired
     private JacksonTester<ItemDtoInfo> json;
-    private final LocalDateTime current = LocalDateTime.parse("2024-05-19T21:09:45", DATE_FORMAT);
 
     @DisplayName("Тест на корректную сериализацию объекта ItemDtoInfo")
     @Test
@@ -30,45 +30,41 @@ public class ItemDtoInfoTest {
                 .name("hoe")
                 .description("garden hoe")
                 .available(true)
-                .lastBooking(new BookingDtoInfo(null, 1L, current, current.plusDays(3),
+                .lastBooking(new BookingDtoInfo(null, 1L, FIXED_TIME, FIXED_TIME.plusDays(3),
                         WAITING, 1L))
                 .nextBooking(null)
-                .comments(List.of(new CommentDto(null, "ok", "Sofia", current, 1L)))
+                .comments(List.of(new CommentDto(null, "ok", "Sofia", FIXED_TIME, 1L)))
                 .build();
 
-        assertThat(this.json.write(itemDtoInfo)).hasJsonPathValue("$.name");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathStringValue("$.name")
-                .isEqualTo("hoe");
+        JsonContent<ItemDtoInfo> itemDtoInfoJson = this.json.write(itemDtoInfo);
 
-        assertThat(this.json.write(itemDtoInfo)).hasJsonPathValue("$.description");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathStringValue("$.description")
+        assertThat(itemDtoInfoJson).hasJsonPathValue("$.name");
+        assertThat(itemDtoInfoJson).extractingJsonPathStringValue("$.name").isEqualTo("hoe");
+
+        assertThat(itemDtoInfoJson).hasJsonPathValue("$.description");
+        assertThat(itemDtoInfoJson).extractingJsonPathStringValue("$.description")
                 .isEqualTo("garden hoe");
 
-        assertThat(this.json.write(itemDtoInfo)).hasJsonPathValue("$.available");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathBooleanValue("$.available")
-                .isEqualTo(true);
+        assertThat(itemDtoInfoJson).hasJsonPathValue("$.available");
+        assertThat(itemDtoInfoJson).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
 
-        assertThat(this.json.write(itemDtoInfo)).hasJsonPathValue("$.lastBooking");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.lastBooking.bookerId")
-                .isEqualTo(1);
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.lastBooking.start")
-                .isEqualTo(current.format(DATE_FORMAT));
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.lastBooking.end")
-                .isEqualTo(current.plusDays(3).format(DATE_FORMAT));
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathStringValue("$.lastBooking.status")
+        assertThat(itemDtoInfoJson).hasJsonPathValue("$.lastBooking");
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.lastBooking.bookerId").isEqualTo(1);
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.lastBooking.start")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.lastBooking.end")
+                .isEqualTo(FIXED_TIME.plusDays(3).format(DATE_FORMAT));
+        assertThat(itemDtoInfoJson).extractingJsonPathStringValue("$.lastBooking.status")
                 .isEqualTo(String.valueOf(WAITING));
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.lastBooking.itemId")
-                .isEqualTo(1);
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.lastBooking.itemId").isEqualTo(1);
 
-        assertThat(this.json.write(itemDtoInfo)).hasJsonPathValue("$.comments");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.comments[0].text")
-                .isEqualTo("ok");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.comments[0].authorName")
+        assertThat(itemDtoInfoJson).hasJsonPathValue("$.comments");
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.comments[0].text").isEqualTo("ok");
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.comments[0].authorName")
                 .isEqualTo("Sofia");
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.comments[0].created")
-                .isEqualTo(current.format(DATE_FORMAT));
-        assertThat(this.json.write(itemDtoInfo)).extractingJsonPathValue("$.comments[0].itemId")
-                .isEqualTo(1);
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.comments[0].created")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
+        assertThat(itemDtoInfoJson).extractingJsonPathValue("$.comments[0].itemId").isEqualTo(1);
     }
 
     @DisplayName("Тест на корректную десериализацию объекта ItemDtoInfo")
@@ -76,25 +72,11 @@ public class ItemDtoInfoTest {
     @SneakyThrows
     public void shouldDeserialize() {
         ItemDtoInfo itemDtoInfo = new ItemDtoInfo(null, "hoe", "garden hoe", true,
-                new BookingDtoInfo(null, 1L, current, current.plusDays(3), WAITING, 1L),
-                null, List.of(new CommentDto(null, "ok", "Sofia", current, 1L)));
+                new BookingDtoInfo(null, 1L, FIXED_TIME, FIXED_TIME.plusDays(3), WAITING, 1L),
+                null, List.of(new CommentDto(null, "ok", "Sofia", FIXED_TIME, 1L)));
 
-        String content = "{" +
-                "\"name\":\"hoe\"," +
-                "\"description\":\"garden hoe\"," +
-                "\"available\":\"true\"," +
-                "\"lastBooking\":{" +
-                "\"bookerId\":\"1\"," +
-                "\"start\":\"2024-05-19T21:09:45\"," +
-                "\"end\":\"2024-05-22T21:09:45\"," +
-                "\"status\":\"WAITING\"," +
-                "\"itemId\":\"1\"}," +
-                "\"comments\":[{" +
-                "\"text\":\"ok\"," +
-                "\"authorName\":\"Sofia\"," +
-                "\"created\":\"2024-05-19T21:09:45\"," +
-                "\"itemId\":\"1\"}]" +
-                "}";
+        var resource = new ClassPathResource("itemDtoInfo.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(itemDtoInfo);
     }

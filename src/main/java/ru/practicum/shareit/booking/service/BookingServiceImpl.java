@@ -15,9 +15,8 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.dto.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,17 +28,16 @@ import static ru.practicum.shareit.booking.BookingStatus.*;
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
-    private final UserMapper userMapper;
 
     @Transactional
     @Override
     public BookingDto createBooking(BookingDtoCreate bookingDtoCreate, Long userId) {
-        User booker = userMapper.toUser(userService.getUserById(userId));
-        Item item = isItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
+        User booker = getUserIfTheExists(userId);
+        Item item = getAvailableItemByIdIfItExists(bookingDtoCreate.getItemId(), userId);
 
-        isBooker(userId, item);
+        getExceptionIfUserIsNotBooker(userId, item);
         Booking booking = bookingRepository.save(bookingMapper.toBooking(bookingDtoCreate, booker, item));
         log.info("User id={} created booking id={} : {}", userId, booking.getId(), bookingDtoCreate);
         return bookingMapper.toBookingDto(booking);
@@ -48,10 +46,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto updateBooking(Long userId, Long bookingId, Boolean approved) {
-        Booking bookingOld = isBookingExistAndNotWaiting(userId, bookingId);
+        Booking bookingOld = getBookingNotWaitingIfItExists(userId, bookingId);
         BookingStatus status = approved ? APPROVED : REJECTED;
         bookingOld.setStatus(status);
-        isOwner(userId, bookingOld);
+        getExceptionIfUserIsNotOwner(userId, bookingOld);
 
         Booking bookingUpdated = bookingRepository.save(bookingOld);
         log.info("Owner item updated status booking id={} to : {}", userId, status);
@@ -73,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDto> getAllBookingsBooker(Long userId, BookingState bookingState,
                                                        Integer from, Integer size) {
-        userService.getUserById(userId);
+        getUserIfTheExists(userId);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
         Collection<Booking> allBookings = getBookingsForBooker(bookingState, userId, pageable);
         log.info("Information about the bookings was obtained by the booker id={}", userId);
@@ -84,14 +82,21 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDto> getAllBookingsOwner(Long userId, BookingState bookingState,
                                                       Integer from, Integer size) {
-        userService.getUserById(userId);
+        getUserIfTheExists(userId);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
         Collection<Booking> allBookings = getBookingsForOwner(bookingState, userId, pageable);
         log.info("Information about the bookings was obtained by the owner id={}", userId);
         return bookingMapper.toBookingDtoCollection(allBookings);
     }
 
-    private Item isItemByIdAvailable(Long itemId, Long userId) {
+    private User getUserIfTheExists(Long userId) {
+        return userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
+            log.warn("User with id={} not found", userId);
+            throw new NotFoundException("User with id=" + userId + " not found");
+        });
+    }
+
+    private Item getAvailableItemByIdIfItExists(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> {
             log.warn("The item with this id={} not found for user id={}", itemId, userId);
             throw new NotFoundException("The item with this id=" + itemId + " not found");
@@ -104,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
         return item;
     }
 
-    private Booking isBookingExistAndNotWaiting(Long userId, Long bookingId) {
+    private Booking getBookingNotWaitingIfItExists(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
             log.warn("Booking id={} user id={} not found", bookingId, userId);
             return new NotFoundException("Booking with id=" + bookingId + " not found");
@@ -117,14 +122,14 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-    private void isOwner(Long userId, Booking booking) {
+    private void getExceptionIfUserIsNotOwner(Long userId, Booking booking) {
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             log.warn("User id={} for booking id={} is not the owner", userId, booking.getId());
             throw new NotFoundException("Booking id=" + booking.getId() + " not found");
         }
     }
 
-    private void isBooker(Long userId, Item item) {
+    private void getExceptionIfUserIsNotBooker(Long userId, Item item) {
         if (item.getOwner().getId().equals(userId)) {
             log.warn("The owner id={} is trying to reserve his item id={}", userId, item.getOwner().getId());
             throw new NotFoundException("The owner cannot booking his item");

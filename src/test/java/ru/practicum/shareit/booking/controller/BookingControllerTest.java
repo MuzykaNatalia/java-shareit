@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -38,7 +39,8 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     public void shouldCreateBooking() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
         BookingDto bookingDto = getBookingDto();
 
         when(bookingService.createBooking(any(), anyLong())).thenReturn(bookingDto);
@@ -183,8 +185,8 @@ public class BookingControllerTest {
     private BookingDto getBookingDto() {
         return new BookingDto(
                 1L,
-                TIME_NOW.plusDays(1),
-                TIME_NOW.plusDays(2),
+                FIXED_TIME.plusDays(1),
+                FIXED_TIME.plusDays(2),
                 WAITING,
                 new UserDto(1L, "Ivan", "ivan@mail.ru"),
                 new ItemDto(1L, "saw", "wood saw", true, null));
@@ -192,7 +194,7 @@ public class BookingControllerTest {
 
     private List<BookingDto> getBookingDtoList() {
         return List.of(
-                new BookingDto(2L, TIME_NOW.plusDays(3), TIME_NOW.plusDays(4), WAITING,
+                new BookingDto(2L, FIXED_TIME.plusDays(3), FIXED_TIME.plusDays(4), WAITING,
                 new UserDto(2L, "Lisa", "lisa@mail.ru"),
                 new ItemDto(2L, "rake", "leaf rake", true, null))
         );
@@ -201,8 +203,8 @@ public class BookingControllerTest {
     private BookingDto getBookingDtoUpdate() {
         return new BookingDto(
                 1L,
-                TIME_NOW.plusDays(1),
-                TIME_NOW.plusDays(2),
+                FIXED_TIME.plusDays(1),
+                FIXED_TIME.plusDays(2),
                 APPROVED,
                 new UserDto(1L, "Ivan", "ivan@mail.ru"),
                 new ItemDto(1L, "saw", "wood saw", true, null));

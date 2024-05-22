@@ -13,7 +13,6 @@ import javax.validation.constraints.*;
 @Builder
 @EqualsAndHashCode
 public class ItemDto {
-    @EqualsAndHashCode.Exclude
     @Positive(groups = Update.class)
     private Long id;
     @NotBlank(groups = Create.class)

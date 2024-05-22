@@ -12,12 +12,11 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import java.time.*;
 import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.practicum.shareit.Constant.DATE_FORMAT;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 import static ru.practicum.shareit.booking.BookingStatus.*;
 
 @DataJpaTest
@@ -44,12 +43,9 @@ public class BookingRepositoryTest {
     private Booking bookingSix;
     private Booking bookingSeven;
     private Booking bookingEight;
-    private LocalDateTime current;
 
     @BeforeEach
     public void setUp() {
-        current = LocalDateTime.parse("2024-05-19T21:09:45", DATE_FORMAT);
-
         ownerOne = userRepository.save(new User(null, "Ivan", "ivan@mail.ru"));
         ownerTwo = userRepository.save(new User(null, "Lisa", "lisa@mail.ru"));
         bookerOne = userRepository.save(new User(null, "Sofia", "sofia@mail.ru"));
@@ -61,22 +57,22 @@ public class BookingRepositoryTest {
                 true, ownerTwo, null));
 
         bookingOne = bookingRepository.save(new Booking(null,
-                current.minusHours(5), current.plusDays(1), itemOne, bookerOne, APPROVED));
+                FIXED_TIME.minusHours(5), FIXED_TIME.plusDays(1), itemOne, bookerOne, APPROVED));
         bookingTwo = bookingRepository.save(new Booking(null,
-                current.minusDays(2), current.minusDays(1), itemOne, bookerOne, REJECTED));
+                FIXED_TIME.minusDays(2), FIXED_TIME.minusDays(1), itemOne, bookerOne, REJECTED));
         bookingThree = bookingRepository.save(new Booking(null,
-                current.plusDays(2), current.plusDays(4), itemOne, bookerTwo, WAITING));
+                FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(4), itemOne, bookerTwo, WAITING));
         bookingFour = bookingRepository.save(new Booking(null,
-                current, current.plusDays(4), itemOne, bookerTwo, APPROVED));
+                FIXED_TIME, FIXED_TIME.plusDays(4), itemOne, bookerTwo, APPROVED));
 
         bookingFive = bookingRepository.save(new Booking(null,
-                current, current.plusDays(3), itemTwo, bookerOne, WAITING));
+                FIXED_TIME, FIXED_TIME.plusDays(3), itemTwo, bookerOne, WAITING));
         bookingSix = bookingRepository.save(new Booking(null,
-                current.minusHours(7), current.plusDays(1), itemTwo, bookerOne, APPROVED));
+                FIXED_TIME.minusHours(7), FIXED_TIME.plusDays(1), itemTwo, bookerOne, APPROVED));
         bookingSeven = bookingRepository.save(new Booking(null,
-                current.plusDays(2).plusHours(1), current.plusDays(3), itemTwo, bookerTwo, REJECTED));
+                FIXED_TIME.plusDays(2).plusHours(1), FIXED_TIME.plusDays(3), itemTwo, bookerTwo, REJECTED));
         bookingEight = bookingRepository.save(new Booking(null,
-                current.minusDays(6), current.minusDays(4), itemTwo, bookerTwo, APPROVED));
+                FIXED_TIME.minusDays(6), FIXED_TIME.minusDays(4), itemTwo, bookerTwo, APPROVED));
     }
 
     @DisplayName("Должен найти бронирование по его id и id пользователя")
@@ -136,9 +132,9 @@ public class BookingRepositoryTest {
         Pageable pageable = getPageable();
 
         List<Booking> resultOne = bookingRepository
-                .findAllByItem_Owner_IdAndEndBefore(ownerOne.getId(), current, pageable);
+                .findAllByItem_Owner_IdAndEndBefore(ownerOne.getId(), FIXED_TIME, pageable);
         List<Booking> resultTwo = bookingRepository
-                .findAllByItem_Owner_IdAndEndBefore(-1L, current, pageable);
+                .findAllByItem_Owner_IdAndEndBefore(-1L, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingTwo))));
         assertThat(resultTwo, hasSize(0));
@@ -150,9 +146,9 @@ public class BookingRepositoryTest {
         Pageable pageable = getPageable();
 
         List<Booking> resultOne = bookingRepository
-                .findAllByItem_Owner_IdAndStartAfter(ownerOne.getId(), current, pageable);
+                .findAllByItem_Owner_IdAndStartAfter(ownerOne.getId(), FIXED_TIME, pageable);
         List<Booking> resultTwo = bookingRepository
-                .findAllByItem_Owner_IdAndStartAfter(-1L, current, pageable);
+                .findAllByItem_Owner_IdAndStartAfter(-1L, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingThree))));
         assertThat(resultTwo, hasSize(0));
@@ -164,7 +160,7 @@ public class BookingRepositoryTest {
         Pageable pageable = getPageable();
 
         List<Booking> resultOne = bookingRepository
-                .findAllByItem_Owner_IdAndStartBeforeAndEndAfter(ownerTwo.getId(), current, current, pageable);
+                .findAllByItem_Owner_IdAndStartBeforeAndEndAfter(ownerTwo.getId(), FIXED_TIME, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingSix))));
     }
@@ -205,8 +201,9 @@ public class BookingRepositoryTest {
     public void findAllByBooker_IdAndEndBefore() {
         Pageable pageable = getPageable();
 
-        List<Booking> resultOne = bookingRepository.findAllByBooker_IdAndEndBefore(bookerOne.getId(), current, pageable);
-        List<Booking> resultTwo = bookingRepository.findAllByBooker_IdAndEndBefore(-1L, current, pageable);
+        List<Booking> resultOne = bookingRepository
+                .findAllByBooker_IdAndEndBefore(bookerOne.getId(), FIXED_TIME, pageable);
+        List<Booking> resultTwo = bookingRepository.findAllByBooker_IdAndEndBefore(-1L, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingTwo))));
         assertThat(resultTwo, hasSize(0));
@@ -219,8 +216,8 @@ public class BookingRepositoryTest {
         Pageable pageable = getPageable();
 
         List<Booking> resultOne = bookingRepository
-                .findAllByBooker_IdAndStartAfter(bookerTwo.getId(), current, pageable);
-        List<Booking> resultTwo = bookingRepository.findAllByBooker_IdAndStartAfter(-1L, current, pageable);
+                .findAllByBooker_IdAndStartAfter(bookerTwo.getId(), FIXED_TIME, pageable);
+        List<Booking> resultTwo = bookingRepository.findAllByBooker_IdAndStartAfter(-1L, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingSeven, bookingThree))));
         assertThat(resultTwo, hasSize(0));
@@ -233,7 +230,7 @@ public class BookingRepositoryTest {
         Pageable pageable = getPageable();
 
         List<Booking> resultOne = bookingRepository
-                .findAllByBooker_IdAndStartBeforeAndEndAfter(bookerOne.getId(), current, current, pageable);
+                .findAllByBooker_IdAndStartBeforeAndEndAfter(bookerOne.getId(), FIXED_TIME, FIXED_TIME, pageable);
 
         assertThat(resultOne, Matchers.is(equalTo(List.of(bookingOne, bookingSix))));
     }
@@ -241,7 +238,8 @@ public class BookingRepositoryTest {
     @DisplayName("Должен найти следующее бронирование для владельца вещи")
     @Test
     public void findNextBookingsForOwner() {
-        List<Booking> result = bookingRepository.findNextBookingsForOwner(current, List.of(itemOne.getId()), APPROVED);
+        List<Booking> result = bookingRepository
+                .findNextBookingsForOwner(FIXED_TIME, List.of(itemOne.getId()), APPROVED);
 
         assertThat(result, Matchers.is(equalTo(List.of(bookingFour))));
     }
@@ -249,7 +247,8 @@ public class BookingRepositoryTest {
     @DisplayName("Должен найти последнее бронирование для владельца вещи")
     @Test
     public void findLastBookingsForOwner() {
-        List<Booking> result = bookingRepository.findLastBookingsForOwner(current, List.of(itemTwo.getId()), APPROVED);
+        List<Booking> result = bookingRepository
+                .findLastBookingsForOwner(FIXED_TIME, List.of(itemTwo.getId()), APPROVED);
 
         assertThat(result, hasSize(0));
     }
@@ -259,9 +258,11 @@ public class BookingRepositoryTest {
     @Test
     public void existsByItemIdAndBookerIdAndStatusAndEndBefore() {
         boolean result = bookingRepository
-                .existsByItemIdAndBookerIdAndStatusAndEndBefore(itemOne.getId(), bookerOne.getId(), REJECTED, current);
+                .existsByItemIdAndBookerIdAndStatusAndEndBefore(itemOne.getId(), bookerOne.getId(),
+                        REJECTED, FIXED_TIME);
         boolean resultTwo = bookingRepository
-                .existsByItemIdAndBookerIdAndStatusAndEndBefore(itemOne.getId(), bookerOne.getId(), APPROVED, current);
+                .existsByItemIdAndBookerIdAndStatusAndEndBefore(itemOne.getId(), bookerOne.getId(),
+                        APPROVED, FIXED_TIME);
 
         assertTrue(result);
         assertFalse(resultTwo);

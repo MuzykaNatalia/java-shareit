@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class ItemDtoInfo {
-    @EqualsAndHashCode.Exclude
     private Long id;
     private String name;
     private String description;

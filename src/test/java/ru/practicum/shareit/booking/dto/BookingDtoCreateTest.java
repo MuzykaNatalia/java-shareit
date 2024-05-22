@@ -5,16 +5,18 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
-import java.time.LocalDateTime;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
+import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.practicum.shareit.Constant.DATE_FORMAT;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 
 @JsonTest
 @AutoConfigureJsonTesters
 public class BookingDtoCreateTest {
     @Autowired
     private JacksonTester<BookingDtoCreate> json;
-    private final LocalDateTime current = LocalDateTime.parse("2024-05-19T21:09:45", DATE_FORMAT);
 
     @DisplayName("Тест на корректную сериализацию объекта BookingDtoCreate")
     @Test
@@ -22,34 +24,32 @@ public class BookingDtoCreateTest {
     public void shouldSerialize() {
         BookingDtoCreate bookingDtoCreate = BookingDtoCreate.builder()
                 .itemId(1L)
-                .start(current)
-                .end(current.plusDays(3))
+                .start(FIXED_TIME)
+                .end(FIXED_TIME.plusDays(3))
                 .build();
 
-        assertThat(this.json.write(bookingDtoCreate)).hasJsonPathValue("$.itemId");
-        assertThat(this.json.write(bookingDtoCreate)).extractingJsonPathValue("$.itemId")
-                .isEqualTo(1);
+        JsonContent<BookingDtoCreate> bookingDtoCreateJson = this.json.write(bookingDtoCreate);
 
-        assertThat(this.json.write(bookingDtoCreate)).hasJsonPathValue("$.start");
-        assertThat(this.json.write(bookingDtoCreate)).extractingJsonPathStringValue("$.start")
-                .isEqualTo(current.format(DATE_FORMAT));
+        assertThat(bookingDtoCreateJson).hasJsonPathValue("$.itemId");
+        assertThat(bookingDtoCreateJson).extractingJsonPathValue("$.itemId").isEqualTo(1);
 
-        assertThat(this.json.write(bookingDtoCreate)).hasJsonPathValue("$.end");
-        assertThat(this.json.write(bookingDtoCreate)).extractingJsonPathStringValue("$.end")
-                .isEqualTo(current.plusDays(3).format(DATE_FORMAT));
+        assertThat(bookingDtoCreateJson).hasJsonPathValue("$.start");
+        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.start")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
+
+        assertThat(bookingDtoCreateJson).hasJsonPathValue("$.end");
+        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.end")
+                .isEqualTo(FIXED_TIME.plusDays(3).format(DATE_FORMAT));
     }
 
     @DisplayName("Тест на корректную десериализацию объекта BookingDtoCreate")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, current, current.plusDays(3));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, FIXED_TIME, FIXED_TIME.plusDays(3));
 
-        String content = "{" +
-                "\"itemId\":\"1\"," +
-                "\"start\":\"2024-05-19T21:09:45\"," +
-                "\"end\":\"2024-05-22T21:09:45\"" +
-                "}";
+        var resource = new ClassPathResource("bookingDtoCreate.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(bookingDtoCreate);
     }

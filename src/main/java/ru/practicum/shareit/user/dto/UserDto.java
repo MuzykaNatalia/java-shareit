@@ -12,7 +12,6 @@ import javax.validation.constraints.*;
 @Builder
 @EqualsAndHashCode
 public class UserDto {
-    @EqualsAndHashCode.Exclude
     @Positive(groups = Update.class)
     private Long id;
     @NotBlank(groups = Create.class)

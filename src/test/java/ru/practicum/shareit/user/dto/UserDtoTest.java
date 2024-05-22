@@ -5,9 +5,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
 import ru.practicum.shareit.config.*;
 import javax.validation.ConstraintViolation;
 import javax.validation.*;
+import java.nio.file.Files;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,13 +36,13 @@ public class UserDtoTest {
                 .email("inna@mail.ru")
                 .build();
 
-        assertThat(this.json.write(userDto)).hasJsonPathValue("$.name");
-        assertThat(this.json.write(userDto)).extractingJsonPathStringValue("$.name")
-                .isEqualTo("Inna");
+        JsonContent<UserDto> userDtoJson = this.json.write(userDto);
 
-        assertThat(this.json.write(userDto)).hasJsonPathValue("$.email");
-        assertThat(this.json.write(userDto)).extractingJsonPathStringValue("$.email")
-                .isEqualTo("inna@mail.ru");
+        assertThat(userDtoJson).hasJsonPathValue("$.name");
+        assertThat(userDtoJson).extractingJsonPathStringValue("$.name").isEqualTo("Inna");
+
+        assertThat(userDtoJson).hasJsonPathValue("$.email");
+        assertThat(userDtoJson).extractingJsonPathStringValue("$.email").isEqualTo("inna@mail.ru");
     }
 
     @DisplayName("Тест на корректную десериализацию объекта UserDto")
@@ -47,10 +50,9 @@ public class UserDtoTest {
     @SneakyThrows
     public void shouldDeserialize() {
         UserDto userDto = new UserDto(null, "Inna", "inna@mail.ru");
-        String content = "{" +
-                "\"name\":\"Inna\"," +
-                "\"email\":\"inna@mail.ru\"" +
-                "}";
+
+        var resource = new ClassPathResource("userDto.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(userDto);
     }

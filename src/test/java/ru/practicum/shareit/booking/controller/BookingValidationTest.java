@@ -13,8 +13,8 @@ import ru.practicum.shareit.booking.dto.BookingDtoCreate;
 import java.nio.charset.StandardCharsets;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 import static ru.practicum.shareit.Constant.HEADER_USER;
-import static ru.practicum.shareit.Constant.TIME_NOW;
 
 @AutoConfigureMockMvc
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:test",
@@ -29,7 +29,8 @@ public class BookingValidationTest {
     @Test
     @SneakyThrows
     public void shouldNotCreateBookingIfTimeEndBeforeTimeStart() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.plusDays(2), TIME_NOW.plusDays(1));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -59,7 +60,8 @@ public class BookingValidationTest {
     @Test
     @SneakyThrows
     public void shouldNotCreateBookingIfTimeStartAndTimeEndEquals() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.plusDays(2), TIME_NOW.plusDays(2));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(2));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -74,7 +76,8 @@ public class BookingValidationTest {
     @Test
     @SneakyThrows
     public void shouldNotCreateBookingIfTimeStartInPast() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.minusDays(5), TIME_NOW.plusDays(1));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                FIXED_TIME.minusDays(5), FIXED_TIME.plusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -89,7 +92,8 @@ public class BookingValidationTest {
     @Test
     @SneakyThrows
     public void shouldNotCreateBookingIfTimeEndInPast() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.minusDays(5), TIME_NOW.minusDays(1));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                FIXED_TIME.minusDays(5), FIXED_TIME.minusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -104,7 +108,8 @@ public class BookingValidationTest {
     @Test
     @SneakyThrows
     public void shouldNotCreateBookingIfItemIdLessOne() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(-5L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2));
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(-5L,
+                FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))

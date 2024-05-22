@@ -16,14 +16,14 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
-import ru.practicum.shareit.user.dto.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ValidationException;
+import static ru.practicum.shareit.Constant.*;
 import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
 
 @Service
@@ -34,13 +34,10 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final ItemRequestRepository itemRequestRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ItemMapper itemMapper;
-    private final UserMapper userMapper;
     private final BookingMapper bookingMapper;
     private final CommentMapper commentMapper;
-    private static final String NEXT = "next";
-    private static final String LAST = "last";
 
     @Transactional(readOnly = true)
     @Override
@@ -76,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
-        User user = userMapper.toUser(userService.getUserById(userId));
+        User user = getUserIfTheExists(userId);
         ItemRequest itemRequest = itemDto.getRequestId() == null ? null :
                 itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(() -> {
                     log.warn("Request id={} not found", itemDto.getRequestId());
@@ -91,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto updateItem(ItemDto itemDtoNew, Long itemId, Long userId) {
-        User user = userMapper.toUser(userService.getUserById(userId));
+        User user = getUserIfTheExists(userId);
         Item itemOld = itemRepository.findById(itemId).stream().findFirst().orElse(null);
         if (itemOld == null || !itemOld.getOwner().getId().equals(userId)) {
             log.warn("The item with this id={} not found", itemId);
@@ -120,12 +117,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long userId, Long itemId) {
-        User user = userMapper.toUser(userService.getUserById(userId));
+        User user = getUserIfTheExists(userId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> {
             log.warn("A user={} wants to leave a review for an item id={} that doesn't exist", userId, itemId);
             throw new ValidationException("The item doesn't exist yet");
         });
-        isBookerOfThisItem(userId, itemId);
+        getExceptionIfIsNotBookerOfThisItem(userId, itemId);
         commentDto.setCreated(LocalDateTime.now());
 
         Comment comment = commentMapper.toComment(commentDto, user, item);
@@ -223,7 +220,14 @@ public class ItemServiceImpl implements ItemService {
         return result;
     }
 
-    private void isBookerOfThisItem(Long userId, Long itemId) {
+    private User getUserIfTheExists(Long userId) {
+        return userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
+            log.warn("User with id={} not found", userId);
+            throw new NotFoundException("User with id=" + userId + " not found");
+        });
+    }
+
+    private void getExceptionIfIsNotBookerOfThisItem(Long userId, Long itemId) {
         boolean isValid = bookingRepository.existsByItemIdAndBookerIdAndStatusAndEndBefore(
                 itemId, userId, APPROVED, LocalDateTime.now());
         if (!isValid) {

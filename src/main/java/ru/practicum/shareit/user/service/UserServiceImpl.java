@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -50,9 +51,14 @@ public class UserServiceImpl implements UserService {
             User createdUser = userRepository.save(userMapper.toUser(userDto));
             log.info("User has been created={}", createdUser);
             return userMapper.toUserDto(createdUser);
-        } catch (Exception e) {
-            log.warn("A user with such an email={} already exists", userDto.getEmail());
-            throw new ConflictException("A user with such an email=" + userDto.getEmail() + " already exists");
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMostSpecificCause().getMessage();
+            log.warn("The user has not been created due to data integrity violation: {}", errorMessage);
+            if (errorMessage != null && errorMessage.contains("PUBLIC.USERS(EMAIL")) {
+                throw new ConflictException("The email " + userDto.getEmail() + " is already in exists");
+            } else {
+                throw new ConflictException("The user has not been created: " + userDto + ". Error: " + errorMessage);
+            }
         }
     }
 
@@ -64,7 +70,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("The user with this id=" + userId + " not already exists");
         });
 
-        isExistEmail(userDtoNew.getEmail(), userOld.getEmail());
+        getExceptionIfEmailExistsAndItIsAlien(userDtoNew.getEmail(), userOld.getEmail());
         User updatedUser = userRepository.save(setUser(userOld, userDtoNew));
         log.info("User has been updated={}", updatedUser);
         return userMapper.toUserDto(updatedUser);
@@ -77,7 +83,7 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private void isExistEmail(String emailNew, String emailOld) {
+    private void getExceptionIfEmailExistsAndItIsAlien(String emailNew, String emailOld) {
         if (emailNew == null) {
             return;
         }

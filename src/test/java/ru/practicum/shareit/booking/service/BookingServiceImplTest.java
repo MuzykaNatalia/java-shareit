@@ -17,12 +17,12 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 import javax.validation.ValidationException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static ru.practicum.shareit.Constant.*;
 import static ru.practicum.shareit.booking.BookingState.WAITING;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
@@ -41,6 +41,7 @@ public class BookingServiceImplTest {
     private ItemDto itemDtoCreate;
     private BookingDtoCreate bookingDtoCreate;
     private BookingDtoCreate bookingDtoTwoCreate;
+    private final LocalDateTime current = LocalDateTime.now();
 
     @BeforeEach
     public void setUp() {
@@ -48,8 +49,8 @@ public class BookingServiceImplTest {
         userDtoTwoCreate = new UserDto(null, "Lisa", "lisa@mail.ru");
         itemDtoOneCreate = new ItemDto(null, "saw", "wood saw", true, null);
         itemDtoCreate = new ItemDto(null, "rake", "leaf rake", false, null);
-        bookingDtoCreate = new BookingDtoCreate(null, TIME_NOW.plusDays(1), TIME_NOW.plusDays(5));
-        bookingDtoTwoCreate = new BookingDtoCreate(null, TIME_NOW.plusNanos(1), TIME_NOW.plusNanos(2));
+        bookingDtoCreate = new BookingDtoCreate(null, current.plusDays(1), current.plusDays(5));
+        bookingDtoTwoCreate = new BookingDtoCreate(null, current.minusHours(20), current.minusHours(2));
     }
 
     @DisplayName("Должен создать бронирование")

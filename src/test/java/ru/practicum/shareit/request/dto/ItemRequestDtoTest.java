@@ -5,8 +5,11 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
 import javax.validation.ConstraintViolation;
 import javax.validation.*;
+import java.nio.file.Files;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +30,14 @@ public class ItemRequestDtoTest {
     @Test
     @SneakyThrows
     public void shouldSerialize() {
-        ItemRequestDto itemRequestDto = ItemRequestDto.builder().description("need hoe").build();
+        ItemRequestDto itemRequestDto = ItemRequestDto.builder()
+                .description("need hoe")
+                .build();
 
-        assertThat(this.json.write(itemRequestDto)).hasJsonPathValue("$.description");
-        assertThat(this.json.write(itemRequestDto)).extractingJsonPathStringValue("$.description")
+        JsonContent<ItemRequestDto> itemRequestDtoJson = this.json.write(itemRequestDto);
+
+        assertThat(itemRequestDtoJson).hasJsonPathValue("$.description");
+        assertThat(itemRequestDtoJson).extractingJsonPathStringValue("$.description")
                 .isEqualTo("need hoe");
     }
 
@@ -39,9 +46,9 @@ public class ItemRequestDtoTest {
     @SneakyThrows
     public void shouldDeserialize() {
         ItemRequestDto itemRequestDto = new ItemRequestDto("need hoe");
-        String content = "{" +
-                "\"description\":\"need hoe\"" +
-                "}";
+
+        var resource = new ClassPathResource("itemRequestDto.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(itemRequestDto);
     }

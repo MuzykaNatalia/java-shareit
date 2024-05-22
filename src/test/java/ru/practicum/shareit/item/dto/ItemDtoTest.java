@@ -5,9 +5,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
 import ru.practicum.shareit.config.*;
 import javax.validation.ConstraintViolation;
 import javax.validation.*;
+import java.nio.file.Files;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,17 +37,16 @@ public class ItemDtoTest {
                 .available(true)
                 .build();
 
-        assertThat(this.json.write(itemDto)).hasJsonPathValue("$.name");
-        assertThat(this.json.write(itemDto)).extractingJsonPathStringValue("$.name")
-                .isEqualTo("hoe");
+        JsonContent<ItemDto> itemDtoJson = this.json.write(itemDto);
 
-        assertThat(this.json.write(itemDto)).hasJsonPathValue("$.description");
-        assertThat(this.json.write(itemDto)).extractingJsonPathStringValue("$.description")
-                .isEqualTo("garden hoe");
+        assertThat(itemDtoJson).hasJsonPathValue("$.name");
+        assertThat(itemDtoJson).extractingJsonPathStringValue("$.name").isEqualTo("hoe");
 
-        assertThat(this.json.write(itemDto)).hasJsonPathValue("$.available");
-        assertThat(this.json.write(itemDto)).extractingJsonPathBooleanValue("$.available")
-                .isEqualTo(true);
+        assertThat(itemDtoJson).hasJsonPathValue("$.description");
+        assertThat(itemDtoJson).extractingJsonPathStringValue("$.description").isEqualTo("garden hoe");
+
+        assertThat(itemDtoJson).hasJsonPathValue("$.available");
+        assertThat(itemDtoJson).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
     }
 
     @DisplayName("Тест на корректную десериализацию объекта ItemDto")
@@ -52,11 +54,9 @@ public class ItemDtoTest {
     @SneakyThrows
     public void shouldDeserialize() {
         ItemDto itemDto = new ItemDto(null, "hoe", "garden hoe", true, null);
-        String content = "{" +
-                "\"name\":\"hoe\"," +
-                "\"description\":\"garden hoe\"," +
-                "\"available\":\"true\"" +
-                "}";
+
+        var resource = new ClassPathResource("itemDto.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(itemDto);
     }

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Builder
 @EqualsAndHashCode
 public class CommentDto {
-    @EqualsAndHashCode.Exclude
     private Long id;
     @NotBlank
     private String text;

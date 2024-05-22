@@ -31,9 +31,9 @@ public class UserServiceImplTest {
     public void setUp() {
         userDtoOneCreate = new UserDto(null, "Ivan", "ivan@mail.ru");
         userDtoTwoCreate = new UserDto(null, "Lisa", "lisa@mail.ru");
-        userDtoOne = new UserDto(1L, "Ivan", "ivan@mail.ru");
+        userDtoOne = new UserDto(null, "Ivan", "ivan@mail.ru");
         userDtoCreateDuplicateEmail = new UserDto(null, "Galina", "ivan@mail.ru");
-        userDtoOneUpdate = new UserDto(1L, "Ivan Petrov", "ivanPetrow@mail.ru");
+        userDtoOneUpdate = new UserDto(null, "Ivan Petrov", "ivanPetrow@mail.ru");
         userDtoOneUpdateDuplicateEmail = new UserDto(1L, "Ivan Petrov", "lisa@mail.ru");
     }
 
@@ -73,6 +73,7 @@ public class UserServiceImplTest {
     @Test
     public void shouldCreateUser() {
         UserDto userDtoCreated = userService.createUser(userDtoOneCreate);
+        userDtoOne.setId(userDtoCreated.getId());
 
         assertThat(userDtoCreated, is(equalTo(userDtoOne)));
     }
@@ -81,6 +82,7 @@ public class UserServiceImplTest {
     @Test
     public void shouldNotCreateUser() {
         UserDto userDtoCreated = userService.createUser(userDtoOneCreate);
+        userDtoOne.setId(userDtoCreated.getId());
 
         assertThat(userDtoCreated, is(equalTo(userDtoOne)));
 
@@ -89,8 +91,8 @@ public class UserServiceImplTest {
                 () -> userService.createUser(userDtoCreateDuplicateEmail)
         );
 
-        assertEquals("A user with such an email=" + userDtoCreateDuplicateEmail.getEmail()
-                + " already exists", exception.getMessage());
+        assertEquals("The email " + userDtoCreateDuplicateEmail.getEmail() + " is already in exists",
+                exception.getMessage());
     }
 
     @DisplayName("Должен обновить пользователя")
@@ -98,6 +100,7 @@ public class UserServiceImplTest {
     public void shouldUpdateUser() {
         UserDto userDtoCreated = userService.createUser(userDtoOneCreate);
         UserDto userDtoUpdated = userService.updateUser(userDtoCreated.getId(), userDtoOneUpdate);
+        userDtoOneUpdate.setId(userDtoCreated.getId());
 
         assertThat(userDtoUpdated, is(equalTo(userDtoOneUpdate)));
     }

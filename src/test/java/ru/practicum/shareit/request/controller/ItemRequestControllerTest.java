@@ -40,14 +40,14 @@ public class ItemRequestControllerTest {
     public void setUp() {
         ItemDto itemDto = new ItemDto(1L, "saw", "wood saw", true, null);
         ItemDto itemDtoTwo = new ItemDto(2L, "rake", "leaf rake", true, null);
-        itemRequestDtoInfo = new ItemRequestDtoInfo(1L, "need a saw", TIME_NOW,
+        itemRequestDtoInfo = new ItemRequestDtoInfo(1L, "need a saw", FIXED_TIME,
                 Collections.singleton(itemDto));
-        itemRequestDtoInfoTwo = new ItemRequestDtoInfo(2L, "need a garden hoe", TIME_NOW,
+        itemRequestDtoInfoTwo = new ItemRequestDtoInfo(2L, "need a garden hoe", FIXED_TIME,
                 Collections.emptyList());
         itemRequestDtoCreateOne = new ItemRequestDto("need a saw");
         itemRequestDtoInfoList = List.of(
-                new ItemRequestDtoInfo(1L, "need a saw", TIME_NOW, Collections.singleton(itemDto)),
-                new ItemRequestDtoInfo(2L, "need a rake", TIME_NOW, Collections.singleton(itemDtoTwo)
+                new ItemRequestDtoInfo(1L, "need a saw", FIXED_TIME, Collections.singleton(itemDto)),
+                new ItemRequestDtoInfo(2L, "need a rake", FIXED_TIME, Collections.singleton(itemDtoTwo)
                 ));
     }
 

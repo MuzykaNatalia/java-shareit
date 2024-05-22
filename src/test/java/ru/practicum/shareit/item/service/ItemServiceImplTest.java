@@ -18,12 +18,13 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 import javax.validation.ValidationException;
+import java.time.LocalDateTime;
 import java.util.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.practicum.shareit.Constant.*;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -54,11 +55,12 @@ public class ItemServiceImplTest {
         itemDtoOneCreate = new ItemDto(null, "saw", "wood saw", true, null);
         itemDtoTwoCreate = new ItemDto(null, "rake", "leaf rake", true, null);
         itemDtoThreeCreate = new ItemDto(null, "rake", "leaf rake", true, 1L);
-        itemDto = new ItemDto(1L, "saw", "wood saw", true, null);
-        itemDtoUpdate = new ItemDto(1L, "saw", "cool wood saw", true, null);
+        itemDto = new ItemDto(null, "saw", "wood saw", true, null);
+        itemDtoUpdate = new ItemDto(null, "saw", "cool wood saw", true, null);
         commentDtoCreate = new CommentDto(null, "good", null, null, null);
-        bookingDtoTwoCreate = new BookingDtoCreate(null, TIME_NOW.plusNanos(1), TIME_NOW.plusNanos(2));
-        bookingDtoCreate = new BookingDtoCreate(1L, TIME_NOW.plusDays(1), TIME_NOW.plusDays(2));
+        bookingDtoTwoCreate = new BookingDtoCreate(null, FIXED_TIME.plusNanos(1), FIXED_TIME.plusNanos(2));
+        bookingDtoCreate = new BookingDtoCreate(null,
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
     }
 
     @DisplayName("Должен выдать исключение при попытке получить вещь по неправильному id")
@@ -148,6 +150,7 @@ public class ItemServiceImplTest {
     public void shouldCreateItem() {
         UserDto userDtoOne = userService.createUser(userDtoOneCreate);
         ItemDto itemDtoOne = itemService.createItem(itemDtoOneCreate, userDtoOne.getId());
+        itemDto.setId(itemDtoOne.getId());
 
         assertThat(itemDtoOne, is(equalTo(itemDto)));
     }
@@ -164,6 +167,7 @@ public class ItemServiceImplTest {
         itemDtoOneCreate.setRequestId(requestDtoCreated.getId());
         itemDto.setRequestId(requestDtoCreated.getId());
         ItemDto itemDtoOne = itemService.createItem(itemDtoOneCreate, userDtoOne.getId());
+        itemDto.setId(itemDtoOne.getId());
 
         assertThat(itemDtoOne, is(equalTo(itemDto)));
     }
@@ -186,10 +190,12 @@ public class ItemServiceImplTest {
     public void shouldUpdateItem() {
         UserDto userDtoOne = userService.createUser(userDtoOneCreate);
         ItemDto itemDtoOne = itemService.createItem(itemDtoOneCreate, userDtoOne.getId());
+        itemDto.setId(itemDtoOne.getId());
 
         assertThat(itemDtoOne, is(equalTo(itemDto)));
 
         ItemDto itemDtoOneUpdated = itemService.updateItem(itemDtoUpdate, itemDtoOne.getId(), userDtoOne.getId());
+        itemDtoUpdate.setId(itemDtoOneUpdated.getId());
 
         assertThat(itemDtoOneUpdated, is(equalTo(itemDtoUpdate)));
     }

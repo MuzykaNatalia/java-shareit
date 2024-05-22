@@ -5,11 +5,14 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.springframework.core.io.ClassPathResource;
 import javax.validation.*;
-import java.time.*;
+import java.nio.file.Files;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.practicum.shareit.Constant.DATE_FORMAT;
+import static ru.practicum.shareit.Constant.FIXED_TIME;
 
 @JsonTest
 @AutoConfigureJsonTesters
@@ -17,8 +20,6 @@ public class CommentDtoTest {
     @Autowired
     private JacksonTester<CommentDto> json;
     private Validator validator;
-    private final LocalDateTime current = LocalDateTime.parse("2024-05-19T21:09:45", DATE_FORMAT);
-
 
     @BeforeEach
     public void setUp() {
@@ -33,38 +34,34 @@ public class CommentDtoTest {
         CommentDto commentDto = CommentDto.builder()
                 .text("ok")
                 .authorName("Sofia")
-                .created(current)
+                .created(FIXED_TIME)
                 .itemId(1L)
                 .build();
 
-        assertThat(this.json.write(commentDto)).hasJsonPathValue("$.text");
-        assertThat(this.json.write(commentDto)).extractingJsonPathStringValue("$.text")
-                .isEqualTo("ok");
+        JsonContent<CommentDto> commentDtoJson = this.json.write(commentDto);
 
-        assertThat(this.json.write(commentDto)).hasJsonPathValue("$.authorName");
-        assertThat(this.json.write(commentDto)).extractingJsonPathStringValue("$.authorName")
-                .isEqualTo("Sofia");
+        assertThat(commentDtoJson).hasJsonPathValue("$.text");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.text").isEqualTo("ok");
 
-        assertThat(this.json.write(commentDto)).hasJsonPathValue("$.created");
-        assertThat(this.json.write(commentDto)).extractingJsonPathStringValue("$.created")
-                .isEqualTo(current.format(DATE_FORMAT));
+        assertThat(commentDtoJson).hasJsonPathValue("$.authorName");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.authorName").isEqualTo("Sofia");
 
-        assertThat(this.json.write(commentDto)).hasJsonPathValue("$.itemId");
-        assertThat(this.json.write(commentDto)).extractingJsonPathValue("$.itemId")
-                .isEqualTo(1);
+        assertThat(commentDtoJson).hasJsonPathValue("$.created");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.created")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
+
+        assertThat(commentDtoJson).hasJsonPathValue("$.itemId");
+        assertThat(commentDtoJson).extractingJsonPathValue("$.itemId").isEqualTo(1);
     }
 
     @DisplayName("Тест на корректную десериализацию объекта CommentDto")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        CommentDto commentDto = new CommentDto(null, "ok", "Sofia", current, 1L);
-        String content = "{" +
-                "\"text\":\"ok\"," +
-                "\"authorName\":\"Sofia\"," +
-                "\"created\":\"2024-05-19T21:09:45Z\"," +
-                "\"itemId\":\"1\"" +
-                "}";
+        CommentDto commentDto = new CommentDto(null, "ok", "Sofia", FIXED_TIME, 1L);
+
+        var resource = new ClassPathResource("commentDto.json");
+        String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(commentDto);
     }
