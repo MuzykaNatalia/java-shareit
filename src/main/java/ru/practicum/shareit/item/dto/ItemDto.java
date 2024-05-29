@@ -5,14 +5,13 @@ import ru.practicum.shareit.config.Create;
 import ru.practicum.shareit.config.Update;
 import javax.validation.constraints.*;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class ItemDto {
     @Positive(groups = Update.class)
     private Long id;

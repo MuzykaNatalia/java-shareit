@@ -2,12 +2,9 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.model.ItemRequest;
 import javax.persistence.*;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Entity
 @Table(name = "item")
 @Getter
@@ -27,7 +24,7 @@ public class Item {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User owner;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     @ToString.Exclude
     private ItemRequest request;

@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class ItemDtoInfo {
     private Long id;
     private String name;
