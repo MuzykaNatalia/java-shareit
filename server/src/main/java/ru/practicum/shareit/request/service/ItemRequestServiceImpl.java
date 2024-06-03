@@ -48,7 +48,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemRequestDtoInfo> getItemRequestsPageByPage(Integer from, Integer size, Long userId) {
+    public List<ItemRequestDtoInfo> getAllItemRequests(Integer from, Integer size, Long userId) {
         getUserIfTheExists(userId);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("created")));
         List<ItemRequest> requests = itemRequestRepository.findAllByRequester_IdNot(userId, pageable);

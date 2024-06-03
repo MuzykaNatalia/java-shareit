@@ -38,7 +38,7 @@ public class ItemRequestClient extends BaseClient {
         return get("", userId);
     }
 
-    public ResponseEntity<Object> getItemRequestsPageByPage(Integer from, Integer size, Long userId) {
+    public ResponseEntity<Object> getAllItemRequests(Integer from, Integer size, Long userId) {
         Map<String, Object> parameters = Map.of("from", from, "size", size);
         return get("/all?from={from}&size={size}", userId, parameters);
     }

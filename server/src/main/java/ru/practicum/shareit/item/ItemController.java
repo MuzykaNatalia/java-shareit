@@ -47,9 +47,10 @@ public class ItemController {
 
     @GetMapping("/search")
     public Collection<ItemDto> searchItems(@RequestParam String text,
+                                           @RequestHeader(HEADER_USER) Long userId,
                                            @RequestParam(defaultValue = PAGE_FROM_DEFAULT) Integer from,
                                            @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) Integer size) {
-        return itemService.searchItems(text, from, size);
+        return itemService.searchItems(text, userId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

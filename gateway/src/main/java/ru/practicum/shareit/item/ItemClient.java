@@ -44,9 +44,9 @@ public class ItemClient extends BaseClient {
         return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> searchItems(String text, Integer from, Integer size) {
+    public ResponseEntity<Object> searchItems(String text, Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of("text", text, "from", from, "size", size);
-        return get("/search?text={text}&from={from}&size={size}", parameters);
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> createComment(CommentDto commentDto, Long userId, Long itemId) {

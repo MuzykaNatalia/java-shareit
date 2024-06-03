@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +18,7 @@ import static ru.practicum.shareit.Constant.*;
 @RequestMapping("/requests")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class ItemRequestController {
     private final ItemRequestClient itemRequestClient;
 
@@ -24,26 +26,31 @@ public class ItemRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createItemRequest(@Valid @RequestBody ItemRequestDto itemRequestDto,
                                                     @RequestHeader(HEADER_USER) @Positive Long userId) {
+        log.info("POST: user request with id={} to create a item request, request body={}", userId, itemRequestDto);
         return itemRequestClient.createItemRequest(itemRequestDto, userId);
     }
 
     @GetMapping
     public ResponseEntity<Object> getListOfRequestsForItemsUser(@RequestHeader(HEADER_USER) @Positive Long userId) {
+        log.info("GET: user request with id={} to view the list of his requests for elements", userId);
         return itemRequestClient.getListOfRequestsForItemsUser(userId);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getItemRequestsPageByPage(@RequestParam(defaultValue = PAGE_FROM_DEFAULT)
+    public ResponseEntity<Object> getAllItemRequests(@RequestParam(defaultValue = PAGE_FROM_DEFAULT)
                                                               @Min(0) Integer from,
                                                               @RequestParam(defaultValue = PAGE_SIZE_DEFAULT)
                                                               @Min(1) Integer size,
                                                               @RequestHeader(HEADER_USER) Long userId) {
-        return itemRequestClient.getItemRequestsPageByPage(from, size, userId);
+        log.info("GET: user request with id={} to view a all items requests. Page from={}, page size={}",
+                userId, from, size);
+        return itemRequestClient.getAllItemRequests(from, size, userId);
     }
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getItemRequestById(@PathVariable @Positive Long requestId,
                                                  @RequestHeader(HEADER_USER) @Positive Long userId) {
+        log.info("GET: user request with id={} to view a item request with id={}", userId, requestId);
         return itemRequestClient.getItemRequestById(requestId, userId);
     }
 }

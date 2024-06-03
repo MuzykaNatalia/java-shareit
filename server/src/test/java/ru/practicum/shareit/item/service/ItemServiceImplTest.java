@@ -223,8 +223,8 @@ public class ItemServiceImplTest {
         UserDto userDtoOne = userService.createUser(userDtoOneCreate);
         ItemDto itemDtoOne = itemService.createItem(itemDtoOneCreate, userDtoOne.getId());
 
-        Collection<ItemDto> items = itemService.searchItems(textOne, 0, 2);
-        Collection<ItemDto> itemsTwo = itemService.searchItems(textTwo, 0, 2);
+        Collection<ItemDto> items = itemService.searchItems(textOne, 1L, 0, 2);
+        Collection<ItemDto> itemsTwo = itemService.searchItems(textTwo, 2L, 0, 2);
 
         assertThat(items, is(hasSize(1)));
         assertThat(items, is(contains(itemDtoOne)));

@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<ItemDto> searchItems(String text, Integer from, Integer size) {
+    public Collection<ItemDto> searchItems(String text, Long userId, Integer from, Integer size) {
         if (text.isEmpty()) {
             return new ArrayList<>();
         }

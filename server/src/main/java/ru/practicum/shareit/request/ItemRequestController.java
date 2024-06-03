@@ -30,12 +30,12 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDtoInfo> getItemRequestsPageByPage(@RequestParam(defaultValue = PAGE_FROM_DEFAULT)
+    public List<ItemRequestDtoInfo> getAllItemRequests(@RequestParam(defaultValue = PAGE_FROM_DEFAULT)
                                                               Integer from,
                                                               @RequestParam(defaultValue = PAGE_SIZE_DEFAULT)
                                                               Integer size,
                                                               @RequestHeader(HEADER_USER) Long userId) {
-        return itemRequestService.getItemRequestsPageByPage(from, size, userId);
+        return itemRequestService.getAllItemRequests(from, size, userId);
     }
 
     @GetMapping("/{requestId}")

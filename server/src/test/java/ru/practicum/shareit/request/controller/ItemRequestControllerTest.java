@@ -106,7 +106,7 @@ public class ItemRequestControllerTest {
     public void shouldGetItemRequestsPageByPage() {
         List<ItemRequestDtoInfo> requests = itemRequestDtoInfoList;
 
-        when(itemRequestService.getItemRequestsPageByPage(anyInt(), anyInt(), anyLong())).thenReturn(requests);
+        when(itemRequestService.getAllItemRequests(anyInt(), anyInt(), anyLong())).thenReturn(requests);
 
         mvc.perform(get("/requests/all")
                         .header(HEADER_USER, 1L))
@@ -120,7 +120,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[1].items").isNotEmpty())
                 .andExpect(status().isOk());
 
-        verify(itemRequestService).getItemRequestsPageByPage(anyInt(), anyInt(), anyLong());
+        verify(itemRequestService).getAllItemRequests(anyInt(), anyInt(), anyLong());
     }
 
     @DisplayName("Должен вернуть запрос по id")

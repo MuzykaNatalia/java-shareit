@@ -1,13 +1,17 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.*;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.core.io.ClassPathResource;
+
 import java.nio.file.Files;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.practicum.shareit.Constant.DATE_FORMAT;
 import static ru.practicum.shareit.Constant.FIXED_TIME;

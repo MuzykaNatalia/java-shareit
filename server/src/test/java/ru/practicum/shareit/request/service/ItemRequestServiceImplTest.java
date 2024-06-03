@@ -78,7 +78,7 @@ public class ItemRequestServiceImplTest {
                 .createItemRequest(itemRequestDtoCreateTwo, userDtoTwo.getId());
 
         List<ItemRequestDtoInfo> result = itemRequestService
-                .getItemRequestsPageByPage(0, 2, userDtoOne.getId());
+                .getAllItemRequests(0, 2, userDtoOne.getId());
 
         assertThat(result, is(hasSize(1)));
         assertThat(result, is(contains(requestDtoCreatedTwo)));

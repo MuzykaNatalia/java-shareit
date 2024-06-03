@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,6 +21,7 @@ import static ru.practicum.shareit.Constant.*;
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class BookingController {
     private final BookingClient bookingClient;
 
@@ -27,6 +29,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createBooking(@Valid @RequestBody BookingDtoCreate bookingDtoCreate,
                                                     @RequestHeader(HEADER_USER) Long userId) {
+        log.info("POST: user request with id={} to create a booking, request body={}", userId, bookingDtoCreate);
         return bookingClient.createBooking(bookingDtoCreate, userId);
     }
 
@@ -34,12 +37,15 @@ public class BookingController {
     public ResponseEntity<Object> updateBooking(@RequestHeader(HEADER_USER) Long userId,
                                     @PathVariable @Positive @NotNull Long bookingId,
                                     @RequestParam @NotNull Boolean approved) {
+        log.info("PATCH: owner request with id={} to update a booking with id={} and parameter \"approved\"={}",
+                userId, bookingId, approved);
         return bookingClient.updateBooking(bookingId, userId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getOneBookingUser(@PathVariable @Positive @NotNull Long bookingId,
                                         @RequestHeader(HEADER_USER) Long userId) {
+        log.info("GET: user request with id={} to view a booking with id={}", userId, bookingId);
         return bookingClient.getOneBookingUser(bookingId, userId);
     }
 
@@ -51,6 +57,8 @@ public class BookingController {
                                                        @Min(0) Integer from,
                                                        @RequestParam(defaultValue = PAGE_SIZE_DEFAULT)
                                                        @Min(1) Integer size) {
+        log.info("GET: user request with id={} to view a bookings with state={}. Page from={}, page size={}",
+                userId, state, from, size);
         return bookingClient.getAllBookingsBooker(userId, BookingState.valueOf(state), from, size);
     }
 
@@ -62,6 +70,8 @@ public class BookingController {
                                                       @Min(0) Integer from,
                                                       @RequestParam(defaultValue = PAGE_SIZE_DEFAULT)
                                                       @Min(1) Integer size) {
+        log.info("GET: owner request with id={} to view a bookings with state={}. Page from={}, page size={}",
+                userId, state, from, size);
         return bookingClient.getAllBookingsOwner(userId, BookingState.valueOf(state), from, size);
     }
 }

@@ -7,7 +7,16 @@ import org.springframework.boot.test.autoconfigure.json.*;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.core.io.ClassPathResource;
+import ru.practicum.shareit.config.Create;
+import ru.practicum.shareit.config.Update;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.nio.file.Files;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
@@ -15,6 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ItemDtoTest {
     @Autowired
     private JacksonTester<ItemDto> json;
+    private Validator validator;
+
+    @BeforeEach
+    public void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
 
     @DisplayName("Тест на корректную сериализацию объекта ItemDto")
     @Test
@@ -48,5 +64,18 @@ public class ItemDtoTest {
         String content = Files.readString(resource.getFile().toPath());
 
         assertThat(this.json.parse(content)).isEqualTo(itemDto);
+    }
+
+    @DisplayName("Проверка корректной валидации объекта ItemDto при создании и обновлении")
+    @Test
+    public void shouldValidation() {
+        ItemDto itemDto = new ItemDto(0L, "", "", null, 0L);
+        ItemDto itemDtoTwo = new ItemDto(-1L, "hoe", "garden hoe", true, 1L);
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto, Create.class);
+        Set<ConstraintViolation<ItemDto>> violationsTwo = validator.validate(itemDtoTwo, Update.class);
+
+        assertThat(violations).isNotEmpty();
+        assertThat(violationsTwo).isNotEmpty();
     }
 }

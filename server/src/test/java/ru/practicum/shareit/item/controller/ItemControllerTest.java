@@ -176,9 +176,10 @@ public class ItemControllerTest {
                 new ItemDto(3L, "rake", "garden leaf rake", true, 2L)
         );
 
-        when(itemService.searchItems(anyString(), anyInt(), anyInt())).thenReturn(itemDtoList);
+        when(itemService.searchItems(anyString(), anyLong(), anyInt(), anyInt())).thenReturn(itemDtoList);
 
-        mvc.perform(get("/items/search?text=", text, 10L, 2L))
+        mvc.perform(get("/items/search?text=", text, 10L, 2L)
+                        .header(HEADER_USER, 1))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(itemDtoList.get(0).getId()))
                 .andExpect(jsonPath("$[0].name").value(itemDtoList.get(0).getName()))
@@ -192,7 +193,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[1].requestId").value(itemDtoList.get(1).getRequestId()))
                 .andExpect(status().isOk());
 
-        verify(itemService).searchItems(anyString(), anyInt(), anyInt());
+        verify(itemService).searchItems(anyString(), anyLong(), anyInt(), anyInt());
     }
 
     @DisplayName("Должен создать комментарий")
